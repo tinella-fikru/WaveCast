@@ -717,8 +717,9 @@ main {
   color: #fff;
   background: #ffffff12;
 }
-.favorite.is-saved {
-  color: var(--coral);
+.favorite.is-saved,
+.favorite.is-saved:hover {
+  color: #ff3030;
 }
 .favorite-wrap {
   position: relative;
