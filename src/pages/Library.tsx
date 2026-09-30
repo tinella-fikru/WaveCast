@@ -9,6 +9,14 @@ export default function Library({ recent = false }: { recent?: boolean }) {
   return (
     <>
       <section className="page-heading">
+        <div className="library-links">
+          <Link className="text-link" to="/collections">
+            Collections
+          </Link>
+          <Link className="text-link" to="/insights">
+            Listening insights
+          </Link>
+        </div>
         <span className="eyebrow">YOUR PERSONAL AIRWAVES</span>
         <h1>{recent ? "Recently played" : "Your favorites"}</h1>
         <p>

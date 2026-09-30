@@ -11,6 +11,7 @@ import { readPreference, writePreference } from "../lib/storage";
 import { useAccount } from "./Account";
 import { icyMetadataProvider, subscribeMetadata } from "../lib/metadata.js";
 import type { MetadataProvider, Station } from "../types";
+import { createPlaybackController } from "../lib/playback.js";
 
 type Status = "idle" | "loading" | "playing" | "paused" | "error";
 type PlayerState = {
@@ -20,6 +21,7 @@ type PlayerState = {
   muted: boolean;
   error: string;
   trackTitle: string | null;
+  connectionMessage: string;
   playStation: (station: Station) => void;
   toggle: () => void;
   setVolume: (volume: number) => void;
@@ -39,11 +41,14 @@ export function PlayerProvider({
 }) {
   const audio = useRef<HTMLAudioElement>(null);
   const current = useRef<Station | null>(null);
-  const generation = useRef(0);
+  const controller = useRef<ReturnType<typeof createPlaybackController> | null>(
+    null,
+  );
   const recorded = useRef(false);
   const [station, setStation] = useState<Station | null>(null);
   const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState("");
+  const [connectionMessage, setConnectionMessage] = useState("");
   const [track, setTrack] = useState<{
     stationUuid: string;
     title: string | null;
@@ -64,22 +69,8 @@ export function PlayerProvider({
   const [remaining, setRemaining] = useState(0);
   const { recordRecent } = useAccount();
 
-  function fail() {
-    audio.current?.pause();
-    setStatus("error");
-    setError("This station is unavailable, try another");
-  }
-
   function resume() {
-    if (!audio.current || !current.current) return;
-    const request = generation.current;
-    setError("");
-    setStatus("loading");
-    if (audio.current.error) audio.current.load();
-    audio.current.play().catch((reason: DOMException) => {
-      if (generation.current === request && reason.name !== "AbortError")
-        fail();
-    });
+    if (current.current) controller.current?.resume();
   }
 
   function playStation(next: Station) {
@@ -88,28 +79,25 @@ export function PlayerProvider({
       toggle();
       return;
     }
-    generation.current++;
     audio.current.pause();
     current.current = next;
     recorded.current = false;
     setStation(next);
     setError("");
     setStatus("loading");
-    audio.current.src = next.url_resolved;
-    audio.current.load();
-    resume();
+    controller.current?.play(next);
     void registerClick(next.stationuuid).catch(() => undefined);
   }
 
   function toggle() {
     if (!audio.current || !current.current) return;
-    if (!audio.current.paused) {
-      audio.current.pause();
-      setStatus("paused");
+    if (status === "playing" || status === "loading") {
+      controller.current?.pause();
     } else resume();
   }
 
   function setVolume(value: number) {
+    value = Math.max(0, Math.min(1, value));
     updateVolume(value);
     setMuted(false);
     writePreference("wavecast-volume", String(value));
@@ -135,13 +123,24 @@ export function PlayerProvider({
   }, [station, metadataActive, metadataProvider]);
 
   useEffect(() => {
-    if (status !== "loading") return;
-    const timeout = window.setTimeout(() => {
-      audio.current?.pause();
-      fail();
-    }, 25000);
-    return () => window.clearTimeout(timeout);
-  }, [status, station?.stationuuid]);
+    if (!audio.current) return;
+    controller.current = createPlaybackController(
+      audio.current,
+      (nextStatus: Status, message: string) => {
+        setStatus(nextStatus);
+        setError(nextStatus === "error" ? message : "");
+        setConnectionMessage(nextStatus !== "error" ? message : "");
+      },
+    );
+    return () => controller.current?.dispose();
+  }, []);
+
+  useEffect(() => {
+    if (status === "playing" && station && !recorded.current) {
+      recorded.current = true;
+      void recordRecent(station);
+    }
+  }, [status, station, recordRecent]);
 
   useEffect(() => {
     if (!sleepUntil) {
@@ -152,7 +151,7 @@ export function PlayerProvider({
       const left = Math.max(0, sleepUntil! - Date.now());
       setRemaining(Math.ceil(left / 1000));
       if (!left) {
-        audio.current?.pause();
+        controller.current?.pause();
         setSleepUntil(null);
       }
     }
@@ -180,10 +179,10 @@ export function PlayerProvider({
       status === "playing" ? "playing" : station ? "paused" : "none";
     navigator.mediaSession.setActionHandler("play", resume);
     navigator.mediaSession.setActionHandler("pause", () =>
-      audio.current?.pause(),
+      controller.current?.pause(),
     );
     navigator.mediaSession.setActionHandler("stop", () =>
-      audio.current?.pause(),
+      controller.current?.pause(),
     );
     return () => {
       for (const action of ["play", "pause", "stop"] as const)
@@ -200,6 +199,7 @@ export function PlayerProvider({
         muted,
         error,
         trackTitle,
+        connectionMessage,
         playStation,
         toggle,
         setVolume,
@@ -210,24 +210,7 @@ export function PlayerProvider({
           setSleepUntil(minutes ? Date.now() + minutes * 60000 : null),
       }}
     >
-      <audio
-        ref={audio}
-        preload="none"
-        onPlaying={() => {
-          setStatus("playing");
-          setError("");
-          if (!recorded.current && current.current) {
-            recorded.current = true;
-            void recordRecent(current.current);
-          }
-        }}
-        onWaiting={() => setStatus("loading")}
-        onPause={() =>
-          setStatus((previous) => (previous === "error" ? previous : "paused"))
-        }
-        onError={fail}
-        onEnded={() => setStatus("paused")}
-      />
+      <audio ref={audio} preload="none" />
       {children}
     </PlayerContext.Provider>
   );

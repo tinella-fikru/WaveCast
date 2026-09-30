@@ -15,6 +15,9 @@ import {
 import { usePlayer } from "../context/Player";
 import { FavoriteButton, StationLogo } from "./Stations";
 import { stationFallback } from "../lib/metadata.js";
+import Share from "./Share";
+import Recovery from "./Recovery";
+import Visualizer from "./Visualizer";
 
 export default function PlayerBar() {
   const player = usePlayer();
@@ -49,20 +52,19 @@ export default function PlayerBar() {
           )}
           <span aria-live="polite">
             {player.error ||
+              player.connectionMessage ||
               (player.status === "loading"
                 ? "Tuning in..."
                 : player.station
                   ? `${player.station.country || "Worldwide"} · ${player.status === "playing" ? "Live radio" : "Paused"}`
                   : "Pick a station. Find your frequency.")}
           </span>
+          <Recovery />
         </div>
         {player.station && <FavoriteButton station={player.station} />}
       </div>
       <div className="player-center">
-        <AudioLines
-          className={player.status === "playing" ? "audio-active" : ""}
-          size={23}
-        />
+        <Visualizer />
         <button
           className="main-play"
           disabled={!player.station}
@@ -85,6 +87,7 @@ export default function PlayerBar() {
         </span>
       </div>
       <div className="player-tools">
+        {player.station && <Share station={player.station} />}
         <button
           className="icon-button volume-button"
           onClick={player.toggleMute}

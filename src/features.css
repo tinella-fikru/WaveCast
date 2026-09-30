@@ -1,0 +1,356 @@
+.app-dialog {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  border-radius: 8px;
+  padding: 24px;
+  width: min(520px, calc(100% - 32px));
+  max-height: 80dvh;
+  overflow: auto;
+  box-shadow: var(--shadow);
+}
+.app-dialog::backdrop {
+  background: #0009;
+}
+.dialog-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 22px;
+}
+.dialog-heading h2 {
+  font-size: 21px;
+}
+.shortcut-list > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+.shortcut-list dd {
+  margin: 0;
+}
+.shortcut-list kbd {
+  color: var(--accent);
+}
+.text-input {
+  width: 100%;
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 12px;
+  margin: 8px 0;
+  font: inherit;
+  min-height: 44px;
+}
+.action-feedback {
+  font-size: 11px;
+  color: var(--accent);
+}
+.station-page {
+  padding: 35px 0 65px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 18px;
+}
+.station-page > .station-logo {
+  width: 96px;
+  height: 96px;
+}
+.station-page h1 {
+  font-size: 32px;
+  overflow-wrap: anywhere;
+  max-width: 100%;
+}
+.station-page p {
+  color: var(--muted);
+  line-height: 1.7;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+.station-page-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.icon-button {
+  min-width: 40px;
+}
+.player-tools {
+  min-width: 0;
+}
+@media (max-width: 520px) {
+  .player-bar:has(.recovery-button) {
+    grid-template-rows: minmax(84px, auto) 29px;
+  }
+  .app-shell:has(.recovery-button) .main-shell {
+    padding-bottom: 167px;
+  }
+}
+.header-actions {
+  gap: 8px;
+}
+.tracking-notice {
+  display: block;
+  color: var(--coral);
+  font-size: 12px;
+  padding: 12px 0;
+}
+.insight-totals {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 30px 0;
+  border-block: 1px solid var(--border);
+}
+.insight-totals > div {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 24px 10px;
+}
+.insight-totals svg {
+  color: var(--accent);
+}
+.insight-totals strong {
+  font-size: 26px;
+  font-family: "Manrope", sans-serif;
+}
+.insight-totals span {
+  color: var(--muted);
+  font-size: 12px;
+}
+.insight-charts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 30px;
+  margin-bottom: 40px;
+}
+.insight-chart {
+  min-width: 0;
+}
+.insight-chart h2 {
+  font-size: 20px;
+}
+.chart-frame {
+  height: 280px;
+  width: 100%;
+  margin-top: 20px;
+}
+.insight-table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 12px;
+}
+.insight-table th,
+.insight-table td {
+  text-align: left;
+  padding: 10px;
+  border-bottom: 1px solid var(--border);
+}
+.insight-table td {
+  text-align: right;
+}
+.feature-navigation {
+  justify-content: flex-end;
+}
+.app-dialog label {
+  display: block;
+}
+.app-dialog p {
+  line-height: 1.7;
+}
+@media (max-width: 900px) {
+  .insight-charts {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (max-width: 520px) {
+  .insight-totals strong {
+    font-size: 21px;
+  }
+  .insight-totals span {
+    font-size: 10px;
+  }
+  .feature-navigation {
+    gap: 16px;
+  }
+}
+.home-library {
+  margin: 35px 0;
+}
+.home-library h2 {
+  overflow-wrap: anywhere;
+}
+.library-links {
+  display: flex;
+  gap: 22px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+.collection-create {
+  display: flex;
+  align-items: end;
+  gap: 16px;
+  margin: 20px 0;
+}
+.collection-create label {
+  flex: 1;
+  max-width: 400px;
+}
+.collection-create input {
+  margin-bottom: 0;
+}
+.collections-layout {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  gap: 28px;
+  margin: 30px 0 60px;
+}
+.collection-nav {
+  display: block;
+  text-align: left;
+  width: 100%;
+  padding: 16px;
+  background: transparent;
+  border-bottom: 1px solid var(--border);
+  overflow-wrap: anywhere;
+}
+.collection-nav.active {
+  background: var(--soft-accent);
+  color: var(--accent);
+}
+.collection-entry {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+.collection-entry > a {
+  flex: 1;
+  min-width: 100px;
+  overflow-wrap: anywhere;
+}
+.entry-controls {
+  display: flex;
+  gap: 2px;
+}
+.collections-layout h2 {
+  overflow-wrap: anywhere;
+}
+.collections-layout .station-logo {
+  width: 40px;
+  height: 40px;
+}
+@media (max-width: 760px) {
+  .collections-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .collections-layout nav {
+    display: flex;
+    overflow: auto;
+  }
+  .collection-nav {
+    min-width: 160px;
+  }
+  .collection-create {
+    flex-wrap: wrap;
+  }
+  .collection-create label {
+    min-width: 180px;
+  }
+  .entry-controls {
+    margin-left: auto;
+  }
+}
+.dialog-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 20px 0;
+}
+.similar-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  width: 100%;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--border);
+  background: none;
+  text-align: left;
+  line-height: 1.5;
+}
+.similar-row span {
+  color: var(--muted);
+  font-size: 12px;
+}
+.recovery-button {
+  font-size: 10px;
+  color: var(--accent);
+  background: none;
+  padding: 3px 0;
+  text-decoration: underline;
+}
+.visualizer {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+.visualizer .icon-button {
+  width: 32px;
+  min-width: 32px;
+}
+.visualizer-on {
+  color: var(--accent);
+}
+.visualizer-display {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  width: 80px;
+  height: 24px;
+  pointer-events: none;
+}
+.visualizer canvas {
+  width: 80px;
+  height: 24px;
+}
+.visualizer .equalizer {
+  position: static;
+  height: 24px;
+  justify-content: center;
+}
+@media (max-width: 520px) {
+  .header-signin svg {
+    display: none;
+  }
+  .header-actions .icon-button {
+    min-width: 30px;
+    width: 30px;
+  }
+  .header-actions {
+    gap: 2px;
+  }
+  .mobile-brand {
+    font-size: 17px;
+  }
+  .mobile-brand svg {
+    width: 19px;
+  }
+  .station-page h1 {
+    font-size: 27px;
+  }
+  .player-tools .action-feedback {
+    position: absolute;
+    bottom: 100%;
+    right: 10px;
+    background: var(--surface);
+    padding: 8px;
+  }
+}

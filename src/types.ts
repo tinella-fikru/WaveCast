@@ -3,6 +3,8 @@ export interface Station {
   name: string;
   favicon: string;
   url_resolved: string;
+  url?: string;
+  homepage?: string;
   country: string;
   countrycode?: string;
   tags: string;

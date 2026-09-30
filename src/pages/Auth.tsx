@@ -23,6 +23,26 @@ export default function Auth() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
+  const emailRedirectTo = import.meta.env.VITE_SITE_URL || new URL(import.meta.env.BASE_URL, window.location.origin).href;
+
+  async function resendConfirmation() {
+    if (!supabase || !email.trim()) {
+      setError("Enter your email address first.");
+      return;
+    }
+    setBusy(true);
+    setError("");
+    setMessage("");
+    try {
+      const { error } = await supabase.auth.resend({ type: "signup", email: email.trim(), options: { emailRedirectTo } });
+      if (error) throw error;
+      setMessage("If your account needs confirmation, a new email has been sent. Use the newest link.");
+    } catch (reason) {
+      setError((reason as Error).message || "Could not resend confirmation. Please try again.");
+    } finally {
+      setBusy(false);
+    }
+  }
 
   if (ready && user) return <Navigate to="/favorites" replace />;
 
@@ -42,7 +62,7 @@ export default function Auth() {
         ? await supabase.auth.signUp({
             email,
             password,
-            options: { emailRedirectTo: window.location.origin },
+            options: { emailRedirectTo },
           })
         : await supabase.auth.signInWithPassword({ email, password });
       if (response.error) throw response.error;
@@ -169,6 +189,9 @@ export default function Auth() {
             )}
           </button>
         </form>
+        <button className="text-link" type="button" disabled={busy} onClick={() => void resendConfirmation()}>
+          Resend confirmation email
+        </button>
         <div className="auth-divider">
           <span />
           or just tune in

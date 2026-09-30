@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   Heart,
   LoaderCircle,
@@ -42,7 +42,7 @@ export function StationLogo({
 
 export function Equalizer() {
   return (
-    <span className="equalizer" aria-label="Playing">
+    <span className="equalizer" role="img" aria-label="Playing">
       <i />
       <i />
       <i />
@@ -150,7 +150,11 @@ export function StationCard({
         {playing && <Equalizer />}
       </div>
       <div className="station-details">
-        <h3 title={station.name}>{station.name}</h3>
+        <h3 title={station.name}>
+          <Link to={`/station/${encodeURIComponent(station.stationuuid)}`}>
+            {station.name}
+          </Link>
+        </h3>
         <p>
           {station.country || "Worldwide"} <span className="meta-dot">·</span>{" "}
           {station.bitrate ? `${station.bitrate} kbps` : "Live stream"}

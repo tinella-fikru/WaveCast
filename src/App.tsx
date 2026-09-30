@@ -28,8 +28,15 @@ import PlayerBar from "./components/PlayerBar";
 import Tour from "./components/Tour";
 import { useAccount } from "./context/Account";
 import { readPreference, writePreference } from "./lib/storage";
+import { InstallButton, OfflineNotice } from "./components/Install";
+import Shortcuts from "./components/Shortcuts";
+import StationPage from "./pages/Station";
+import "./features.css";
+import ListeningTracker from "./components/ListeningTracker";
 
 const Countries = lazy(() => import("./pages/Countries"));
+const Collections = lazy(() => import("./pages/Collections"));
+const Insights = lazy(() => import("./pages/Insights"));
 
 export default function App() {
   const { user, signOut } = useAccount();
@@ -40,17 +47,24 @@ export default function App() {
   const [error, setError] = useState("");
   const location = useLocation();
   const navigate = useNavigate();
-  const title = location.pathname.startsWith("/countries")
-    ? "Explore by Country"
-    : location.pathname === "/browse"
-      ? "Browse stations"
-      : location.pathname === "/favorites"
-        ? "Your favorites"
-        : location.pathname === "/recent"
-          ? "Recently played"
-          : location.pathname === "/login"
-            ? "Your account"
-            : "Discover";
+  const title =
+    location.pathname === "/collections"
+      ? "Collections"
+      : location.pathname === "/insights"
+        ? "Listening insights"
+        : location.pathname.startsWith("/station/")
+          ? "Station"
+          : location.pathname.startsWith("/countries")
+            ? "Explore by Country"
+            : location.pathname === "/browse"
+              ? "Browse stations"
+              : location.pathname === "/favorites"
+                ? "Your favorites"
+                : location.pathname === "/recent"
+                  ? "Recently played"
+                  : location.pathname === "/login"
+                    ? "Your account"
+                    : "Discover";
 
   useEffect(() => {
     document.documentElement.dataset.theme = light ? "light" : "dark";
@@ -153,6 +167,8 @@ export default function App() {
             <span className="desktop-title">{title}</span>
           </div>
           <div className="header-actions">
+            <Shortcuts />
+            <InstallButton />
             <span className="global-live">
               <Globe2 size={15} /> A whole world, live
             </span>
@@ -195,9 +211,39 @@ export default function App() {
           </div>
         )}
         <main id="main-content" tabIndex={-1}>
+          <ListeningTracker />
+          <nav
+            className="library-links feature-navigation"
+            aria-label="Personal library"
+          >
+            <Link className="text-link" to="/collections">
+              Collections
+            </Link>
+            <Link className="text-link" to="/insights">
+              Listening insights
+            </Link>
+          </nav>
+          <OfflineNotice />
           <Routes>
             <Route path="/" element={<Discover />} />
             <Route path="/browse" element={<Discover browse />} />
+            <Route path="/station/:uuid" element={<StationPage />} />
+            <Route
+              path="/collections"
+              element={
+                <Suspense fallback={<p>Loading collections...</p>}>
+                  <Collections />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/insights"
+              element={
+                <Suspense fallback={<p>Loading insights...</p>}>
+                  <Insights />
+                </Suspense>
+              }
+            />
             <Route
               path="/countries"
               element={

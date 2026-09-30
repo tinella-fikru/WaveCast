@@ -1,5 +1,10 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
+import {
+  Link,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from "react-router-dom";
 import {
   ArrowRight,
   AudioLines,
@@ -21,6 +26,7 @@ import {
 import { radioRequest, searchStations } from "../lib/radio.js";
 import { StationGrid } from "../components/Stations";
 import type { Station } from "../types";
+import HomeLibrary from "../components/HomeLibrary";
 
 const genres = [
   { name: "All stations", tag: "", icon: AudioLines },
@@ -73,7 +79,11 @@ export default function Discover({ browse = false }: { browse?: boolean }) {
     setError("");
     setStations([]);
     setHasMore(false);
-    searchStations({ name, tag, country, countryExact, language }, 0, controller.signal)
+    searchStations(
+      { name, tag, country, countryExact, language },
+      0,
+      controller.signal,
+    )
       .then((result) => {
         setStations(result.stations);
         setOffset(result.nextOffset);
@@ -124,7 +134,9 @@ export default function Discover({ browse = false }: { browse?: boolean }) {
     const next = new URLSearchParams(params);
     if (key === "country" && countryName) {
       next.delete("country");
-      navigate(`${value ? `/countries/${encodeURIComponent(value)}` : "/browse"}?${next}`);
+      navigate(
+        `${value ? `/countries/${encodeURIComponent(value)}` : "/browse"}?${next}`,
+      );
       return;
     }
     if (value) next.set(key, value);
@@ -219,10 +231,18 @@ export default function Discover({ browse = false }: { browse?: boolean }) {
     <>
       {browse ? (
         <section className="page-heading">
-          {countryName && <Link className="text-link country-back" to="/countries"><Globe2 size={16} /> Explore by Country</Link>}
+          {countryName && (
+            <Link className="text-link country-back" to="/countries">
+              <Globe2 size={16} /> Explore by Country
+            </Link>
+          )}
           <span className="eyebrow">A WORLD OF FREQUENCIES</span>
           <h1>{countryName || "Explore the airwaves"}</h1>
-          <p>{countryName ? "Live stations, ranked by popularity." : "Somewhere in the world, your next favorite station is live."}</p>
+          <p>
+            {countryName
+              ? "Live stations, ranked by popularity."
+              : "Somewhere in the world, your next favorite station is live."}
+          </p>
           {searchForm}
         </section>
       ) : (
@@ -348,7 +368,9 @@ export default function Discover({ browse = false }: { browse?: boolean }) {
               {browse
                 ? name
                   ? `Results for "${name}"`
-                  : countryName ? "Top stations" : "Discover stations"
+                  : countryName
+                    ? "Top stations"
+                    : "Discover stations"
                 : tag
                   ? `${genres.find((genre) => genre.tag === tag)?.name ?? tag} on the air`
                   : "Popular right now"}
@@ -393,6 +415,7 @@ export default function Discover({ browse = false }: { browse?: boolean }) {
         )}
       </section>
 
+      {!browse && <HomeLibrary />}
       {!browse && (
         <section className="around-world">
           <div className="section-heading">
@@ -401,7 +424,9 @@ export default function Discover({ browse = false }: { browse?: boolean }) {
               <h2>Around the world in a few clicks</h2>
               <p>Same planet. A whole different soundtrack.</p>
             </div>
-            <Link className="text-link" to="/countries"><Globe2 size={20} /> Explore by Country <ArrowRight size={16} /></Link>
+            <Link className="text-link" to="/countries">
+              <Globe2 size={20} /> Explore by Country <ArrowRight size={16} />
+            </Link>
           </div>
           <div className="country-grid">
             {[
