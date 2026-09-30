@@ -9,7 +9,8 @@ import {
 import { registerClick } from "../lib/radio.js";
 import { readPreference, writePreference } from "../lib/storage";
 import { useAccount } from "./Account";
-import type { Station } from "../types";
+import { icyMetadataProvider, subscribeMetadata } from "../lib/metadata.js";
+import type { MetadataProvider, Station } from "../types";
 
 type Status = "idle" | "loading" | "playing" | "paused" | "error";
 type PlayerState = {
@@ -18,6 +19,7 @@ type PlayerState = {
   volume: number;
   muted: boolean;
   error: string;
+  trackTitle: string | null;
   playStation: (station: Station) => void;
   toggle: () => void;
   setVolume: (volume: number) => void;
@@ -28,7 +30,13 @@ type PlayerState = {
 };
 const PlayerContext = createContext<PlayerState | null>(null);
 
-export function PlayerProvider({ children }: { children: ReactNode }) {
+export function PlayerProvider({
+  children,
+  metadataProvider = icyMetadataProvider,
+}: {
+  children: ReactNode;
+  metadataProvider?: MetadataProvider;
+}) {
   const audio = useRef<HTMLAudioElement>(null);
   const current = useRef<Station | null>(null);
   const generation = useRef(0);
@@ -36,6 +44,15 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const [station, setStation] = useState<Station | null>(null);
   const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState("");
+  const [track, setTrack] = useState<{
+    stationUuid: string;
+    title: string | null;
+  } | null>(null);
+  const metadataActive = status === "playing";
+  const trackTitle =
+    metadataActive && track?.stationUuid === station?.stationuuid
+      ? (track?.title ?? null)
+      : null;
   const [volume, updateVolume] = useState(() =>
     Math.max(
       0,
@@ -106,6 +123,18 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   }, [volume, muted]);
 
   useEffect(() => {
+    setTrack(null);
+    if (!station || !metadataActive) return;
+    return subscribeMetadata(
+      metadataProvider,
+      station,
+      (title: string | null) => {
+        setTrack({ stationUuid: station.stationuuid, title });
+      },
+    );
+  }, [station, metadataActive, metadataProvider]);
+
+  useEffect(() => {
     if (status !== "loading") return;
     const timeout = window.setTimeout(() => {
       audio.current?.pause();
@@ -140,8 +169,8 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     if (!("mediaSession" in navigator)) return;
     if (station)
       navigator.mediaSession.metadata = new MediaMetadata({
-        title: station.name,
-        artist: station.country || "Live radio",
+        title: trackTitle || station.name,
+        artist: trackTitle ? station.name : station.country || "Live radio",
         album: "WaveCast",
         artwork: station.favicon.startsWith("https://")
           ? [{ src: station.favicon }]
@@ -160,7 +189,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       for (const action of ["play", "pause", "stop"] as const)
         navigator.mediaSession.setActionHandler(action, null);
     };
-  }, [station, status]);
+  }, [station, status, trackTitle]);
 
   return (
     <PlayerContext.Provider
@@ -170,6 +199,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
         volume,
         muted,
         error,
+        trackTitle,
         playStation,
         toggle,
         setVolume,

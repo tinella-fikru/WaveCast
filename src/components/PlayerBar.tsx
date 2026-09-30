@@ -14,9 +14,13 @@ import {
 } from "lucide-react";
 import { usePlayer } from "../context/Player";
 import { FavoriteButton, StationLogo } from "./Stations";
+import { stationFallback } from "../lib/metadata.js";
 
 export default function PlayerBar() {
   const player = usePlayer();
+  const nowPlaying = player.station
+    ? player.trackTitle || stationFallback(player.station)
+    : "";
   const [timerOpen, setTimerOpen] = useState(false);
   const active = player.status === "playing" || player.status === "loading";
   const VolumeIcon =
@@ -33,6 +37,16 @@ export default function PlayerBar() {
           <strong>
             {player.station?.name || "Your next favorite is out there"}
           </strong>
+          {player.station && (
+            <span
+              className="now-playing"
+              aria-live="polite"
+              aria-atomic="true"
+              title={`Now playing: ${nowPlaying}`}
+            >
+              Now playing: {nowPlaying}
+            </span>
+          )}
           <span aria-live="polite">
             {player.error ||
               (player.status === "loading"

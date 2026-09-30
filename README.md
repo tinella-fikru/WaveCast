@@ -34,6 +34,7 @@ The app intentionally does not simulate authentication when credentials are abse
 - Home discovery, live genre selection, country discovery, URL-addressable browse filters, and load-more pagination.
 - HTTPS-only station streams, fallback logos, skeletons, retry and empty states. Directory calls retry the DE, AT, and NL servers with per-server timeouts and cancellation.
 - A single persistent HTML5 audio element; no page-load autoplay. Play/pause, buffering feedback, stream error recovery, volume, mute, Media Session controls, and 15/30/60-minute sleep timers.
+- A best-effort ICY "Now playing" line, with station name and tags as a quiet fallback. Available track titles also appear in Media Session metadata.
 - Email/password signup and sign-in, favorites, and the last 20 recently played stations per account.
 - Dark/light themes and accessible first-run onboarding, with a per-user metadata flag and localStorage fallback. Replay is available in the sidebar.
 - Self-hosted fonts, responsive layouts, reduced-motion support, and keyboard focus indicators.
@@ -45,6 +46,14 @@ Both tables use row-level security. Favorites are readable/writable only by thei
 The history function uses `security definer` with an empty search path, schema-qualified references, and authenticated-only execution. Onboarding completion is stored in user metadata, not used for authorization.
 
 Radio directory metadata and live stream availability are controlled by third parties. A secure source URL can still redirect to HTTP or use a codec unsupported by a browser; those streams show the friendly unavailable state. Browsers/operating systems may suspend background tabs, so sleep timers are best-effort while suspended and recheck their deadline when the tab resumes. Mobile hardware may control the actual output volume.
+
+## Track metadata
+
+The player accepts an optional `metadataProvider` prop implementing `MetadataProvider` from [src/types.ts](src/types.ts): `subscribe(station, onTitle)` returns an unsubscribe function. Publish a track title with `onTitle(title)` or request the fallback with `onTitle(null)`. Providers must release resources when unsubscribed. The adapter ignores late callbacks after cancellation, and titles are scoped to their station to prevent stale updates after switching.
+
+The default provider in [src/lib/metadata.js](src/lib/metadata.js) uses `icecast-metadata-js` for ICY parsing. During playback it requests `Icy-MetaData: 1`, reads the exposed `icy-metaint` header, and probes for metadata every 30 seconds. Each probe has a 10-second timeout and a 256 KiB parsing budget; it closes the auxiliary connection after reading metadata. These requests use some additional bandwidth but never replace or modify the HTML5 audio stream. Pausing, buffering, changing stations, and unmounting stop the subscription.
+
+Stations must allow browser CORS requests (including the `Icy-MetaData` header) and expose `icy-metaint`. Blocked requests, missing/invalid headers, missing titles, and parsing failures do not show a metadata error or interrupt playback. Unsupported stations stop probing until playback resumes. HLS timed metadata and server-side metadata proxies are not included. Polling is best-effort and may differ slightly from the audio buffer's timing; a future provider can replace it with a station API or server-side feed.
 
 ## Deployment
 

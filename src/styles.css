@@ -989,6 +989,22 @@ main {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+.player-station-copy > .now-playing {
+  margin-top: 4px;
+  color: var(--text);
+  line-height: 1.35;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.player-station-copy:has(.now-playing) > span:last-child {
+  margin-top: 3px;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 .player-station:has(.player-station-copy) > .favorite-wrap {
   margin-left: 8px;
 }
@@ -2194,6 +2210,11 @@ main {
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
+  .player-station-copy > .now-playing {
+    display: block;
+    white-space: nowrap;
+    margin-top: 3px;
+  }
   .player-tools {
     grid-column: 1 / -1;
     grid-row: 2;
@@ -2323,7 +2344,10 @@ main {
 body {
   min-width: 0;
 }
-.country-back { display: flex; margin-bottom: 22px; }
+.country-back {
+  display: flex;
+  margin-bottom: 22px;
+}
 @media (max-width: 520px) {
   .main-nav > a,
   .main-nav > a:last-child {

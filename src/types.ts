@@ -24,6 +24,13 @@ export interface SavedStation {
   played_at?: string;
 }
 
+export interface MetadataProvider {
+  subscribe(
+    station: Station,
+    onTitle: (title: string | null) => void,
+  ): () => void;
+}
+
 export function fromSaved(row: SavedStation): Station {
   return {
     stationuuid: row.station_uuid,

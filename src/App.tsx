@@ -40,10 +40,9 @@ export default function App() {
   const [error, setError] = useState("");
   const location = useLocation();
   const navigate = useNavigate();
-  const title =
-    location.pathname.startsWith("/countries")
-      ? "Explore by Country"
-      : location.pathname === "/browse"
+  const title = location.pathname.startsWith("/countries")
+    ? "Explore by Country"
+    : location.pathname === "/browse"
       ? "Browse stations"
       : location.pathname === "/favorites"
         ? "Your favorites"
@@ -90,11 +89,19 @@ export default function App() {
             <Home size={19} />
             <span>Discover</span>
           </NavLink>
-          <NavLink to="/browse">
+          <NavLink
+            to="/browse"
+            aria-label="Browse stations"
+            title="Browse stations"
+          >
             <Compass size={19} />
             <span>Browse stations</span>
           </NavLink>
-          <NavLink to="/countries" aria-label="Explore by Country" title="Explore by Country">
+          <NavLink
+            to="/countries"
+            aria-label="Explore by Country"
+            title="Explore by Country"
+          >
             <Globe2 size={19} />
             <span>Explore by Country</span>
           </NavLink>
@@ -191,8 +198,24 @@ export default function App() {
           <Routes>
             <Route path="/" element={<Discover />} />
             <Route path="/browse" element={<Discover browse />} />
-            <Route path="/countries" element={<Suspense fallback={<div className="empty-state" role="status">Loading country explorer...</div>}><Countries /></Suspense>} />
-            <Route path="/countries/:countryName" element={<Discover browse />} />
+            <Route
+              path="/countries"
+              element={
+                <Suspense
+                  fallback={
+                    <div className="empty-state" role="status">
+                      Loading country explorer...
+                    </div>
+                  }
+                >
+                  <Countries />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/countries/:countryName"
+              element={<Discover browse />}
+            />
             <Route path="/favorites" element={<Library />} />
             <Route path="/recent" element={<Library recent />} />
             <Route path="/login" element={<Auth />} />
