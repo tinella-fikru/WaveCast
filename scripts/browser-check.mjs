@@ -141,7 +141,7 @@ try {
     /\/station\/11111111/,
   );
   const violations = [];
-  for (const width of [320, 390, 768, 1440]) {
+  for (const width of [320, 360, 375, 390, 414, 520, 600, 768, 1440]) {
     await page.setViewportSize({ width, height: 900 });
     await page.evaluate(() => document.fonts.ready);
     assert.equal(
@@ -168,6 +168,28 @@ try {
       );
     });
     assert.equal(overlap, false, `Player overlap at ${width}`);
+    const controlCollisions = await page.evaluate(() => {
+      const collisions = [];
+      for (const selector of [
+        '.player-center button, .player-tools button, .volume-slider, .visualizer-display, .player-mobile-mark',
+        '.header-actions > *, .page-breadcrumb',
+        '.main-nav > a',
+      ]) {
+        const elements = Array.from(document.querySelectorAll(selector)).filter(element => element.getClientRects().length > 0);
+        for (const [index, element] of elements.entries()) {
+          const first = element.getBoundingClientRect();
+          if (first.left < 0 || first.right > innerWidth) collisions.push(`${element.className}: outside viewport`);
+          for (const next of elements.slice(index + 1)) {
+            const second = next.getBoundingClientRect();
+            if (first.left < second.right && first.right > second.left && first.top < second.bottom && first.bottom > second.top) {
+              collisions.push(`${element.className} overlaps ${next.className}`);
+            }
+          }
+        }
+      }
+      return collisions;
+    });
+    assert.deepEqual(controlCollisions, [], `Control collisions at ${width}`);
     await page.screenshot({
       path: `test-results/station-${width}.png`,
       fullPage: true,

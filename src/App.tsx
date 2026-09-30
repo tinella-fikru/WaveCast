@@ -99,7 +99,7 @@ export default function App() {
         </Link>
         <span className="nav-caption">YOUR DAILY DISCOVERY</span>
         <nav className="main-nav" aria-label="Main navigation">
-          <NavLink to="/" end>
+          <NavLink to="/" end aria-label="Discover" title="Discover">
             <Home size={19} />
             <span>Discover</span>
           </NavLink>
@@ -120,7 +120,7 @@ export default function App() {
             <span>Explore by Country</span>
           </NavLink>
           <span className="nav-caption library-caption">YOUR LIBRARY</span>
-          <NavLink to="/favorites">
+          <NavLink to="/favorites" aria-label="Favorites" title="Favorites">
             <Heart size={19} />
             <span>Favorites</span>
           </NavLink>
